@@ -1,4 +1,17 @@
 <div class="p-6 max-w-7xl mx-auto">
+    @if (session()->has('message'))
+        <div x-data="{ show: true }" 
+            x-show="show" 
+            x-init="setTimeout(() => show = false, 4000)"
+            x-transition:leave="transition ease-in duration-500"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="mb-4 p-4 bg-green-100 border border-green-200 text-green-800 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm">
+            <span>✅</span>
+            <span>{{ session('message') }}</span>
+        </div>
+    @endif
+
     @if (session()->has('error'))
         <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
             {{ session('error') }}

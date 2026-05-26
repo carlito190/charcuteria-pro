@@ -44,6 +44,7 @@ class CreateSale extends Component
     //Fechas
     public $date_from;
     public $date_to;
+   
 
     public function mount()
     {
@@ -315,17 +316,6 @@ class CreateSale extends Component
 
     public function render()
     {
-        // Buscador dinámico de productos
-        $products = [];
-        if (strlen($this->search) > 1) {
-            $products = Product::where('name', 'like', '%' . $this->search . '%')
-                                ->orWhere('barcode', 'like', '%' . $this->search . '%')
-                                ->take(5)
-                                ->get();
-        }
-
-        return view('livewire.sales.create-sale', [
-            'products' => $products
-        ]);
+       return view('livewire.sales.create-sale');
     }
 }

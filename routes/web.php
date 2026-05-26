@@ -7,6 +7,9 @@ use App\Livewire\PurchaseManager;
 use App\Livewire\TransferManager;
 use App\Livewire\Sales\CreateSale;
 use App\Livewire\Sales\IndexSales;
+use App\Livewire\Purchases\IndexPurchases;
+use App\Livewire\Users\UserManager;
+use App\Livewire\BrandManager;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,13 +31,16 @@ Route::middleware([
 
     // Aquí iremos añadiendo las demás, por ejemplo:
     Route::get('/productos', ProductManager::class)->name('products');
-    Route::get('/compras', PurchaseManager::class)->name('purchases');
+    Route::get('/compras/crear', PurchaseManager::class)->name('purchases');
     Route::get('/sucursales', App\Livewire\BranchManager::class)->name('branches');
     Route::get('/categorias', App\Livewire\CategoryManager::class)->name('categories');
     Route::get('/tasas', App\Livewire\ExchangeRateManager::class)->name('exchange-rates');
     Route::get('/transfers', TransferManager::class)->name('transfers.index');
     Route::get('/ventas/crear', CreateSale::class)->name('sales.create');
     Route::get('/ventas', IndexSales::class)->name('sales.index');
+    Route::get('/compras', IndexPurchases::class)->name('purchases.index');
+    Route::get('/usuarios', UserManager::class)->name('users.index');
+    Route::get('/marcas', BrandManager::class)->name('brands.index');
 });
 
 Route::get('/ventas/{sale}/ticket', function (\App\Models\Sale $sale) {

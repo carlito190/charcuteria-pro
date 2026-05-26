@@ -47,17 +47,27 @@ class IndexSales extends Component
 
     public function render()
     {
-        // Busca ventas por número de factura o nombre de cliente de la sede actual
-        $sales = Sale::where('branch_id', $this->branch_id)
-            ->where(function($query) {
-                $query->where('invoice_number', 'like', '%' . $this->search . '%')
-                      ->orWhere('client_name', 'like', '%' . $this->search . '%');
+        $user = auth()->user();
+        $query = Sale::query();
+
+        // 🛡️ Filtro jerárquico activo
+        if (!$user->isGlobalAdmin()) {
+            $query->where('branch_id', $user->branch_id);
+        }
+
+        // Buscador por número de factura o nombre del cliente
+        $sales = $query->where(function($q) {
+                $q->where('invoice_number', 'like', '%' . $this->search . '%')
+                ->orWhere('client_name', 'like', '%' . $this->search . '%');
             })
             ->latest()
             ->paginate(10);
 
+        // 💡 PASAMOS LAS VARIABLES EXPLICITAMENTE para que Blade no las dé como indefinidas
         return view('livewire.sales.index-sales', [
-            'sales' => $sales
+            'sales' => $sales,
+            'show_detail_modal' => $this->show_detail_modal,
+            'selected_sale' => $this->selected_sale
         ]);
     }
 }

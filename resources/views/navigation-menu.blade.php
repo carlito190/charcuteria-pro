@@ -35,12 +35,16 @@
                         {{ __('Compras') }}
                     </x-nav-link>
 
+                    <x-nav-link href="{{ route('purchases.index') }}" :active="request()->routeIs('purchases.index')">
+                        {{ __('Comp. Historial') }}
+                    </x-nav-link>
+
                     <x-nav-link href="{{ route('sales.create') }}" :active="request()->routeIs('sales.create')">
                         {{ __('Ventas') }}
                     </x-nav-link>
 
                    <x-nav-link href="{{ route('sales.index') }}" :active="request()->routeIs('sales.index')">
-                        {{ __('Ver Historial') }}
+                        {{ __('Ven. Historial') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('branches') }}" :active="request()->routeIs('branches')">
@@ -49,6 +53,10 @@
 
                     <x-nav-link href="{{ route('categories') }}" :active="request()->routeIs('categories')">
                         {{ __('Categorías') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('brands.index') }}" :active="request()->routeIs('brands.index')">
+                        {{ __('Marcas') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('exchange-rates') }}" :active="request()->routeIs('exchange-rates')">
@@ -140,6 +148,10 @@
 
                             <x-dropdown-link href="{{ route('profile.show') }}">
                                 {{ __('Profile') }}
+                            </x-dropdown-link>
+
+                              <x-dropdown-link href="{{ route('users.index') }}">
+                                {{ __('Usuarios') }}
                             </x-dropdown-link>
 
                             @if (Laravel\Jetstream\Jetstream::hasApiFeatures())

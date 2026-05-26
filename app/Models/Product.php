@@ -8,7 +8,18 @@ use App\Models\ExchangeRate;
 
 class Product extends Model
 {
-    protected $fillable = ['name','unit_type', 'category_id', 'cost_usd', 'profit_margin', 'barcode', 'is_active'];
+    protected $fillable = 
+    [
+        'name',
+        'unit_type', 
+        'category_id', 
+        'cost_usd', 
+        'profit_margin', 
+        'barcode', 
+        'is_active',
+        'brand_id',
+        'image_path'
+    ];
 
     public function category()
     {
@@ -32,5 +43,10 @@ class Product extends Model
 
     return $this->hasMany(ProductBranch::class);
 
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 }

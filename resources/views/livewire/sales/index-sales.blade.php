@@ -62,8 +62,8 @@
         </div>
     </div>
 
-    @if($show_detail_modal && $selected_sale)
-        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none">
+    @if($this->show_detail_modal && $this->selected_sale)
+        <div wire:key="modal-sale-{{ $this->selected_sale->id }}" class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none">
             <div class="fixed inset-0 bg-black opacity-50" wire:click="closeDetailModal"></div>
             
             <div class="relative w-full max-w-2xl mx-auto my-6 z-50 p-4">
@@ -71,8 +71,8 @@
                     
                     <div class="flex items-center justify-between p-4 bg-blue-900 text-white">
                         <div>
-                            <h3 class="text-lg font-black">Detalle de Factura: #{{ $selected_sale->invoice_number }}</h3>
-                            <p class="text-xs text-blue-200">{{ $selected_sale->created_at->format('d/m/Y h:i A') }}</p>
+                            <h3 class="text-lg font-black">Detalle de Factura: #{{ $$this->selected_sale->invoice_number }}</h3>
+                            <p class="text-xs text-blue-200">{{ $this->selected_sale->created_at->format('d/m/Y h:i A') }}</p>
                         </div>
                         <button type="button" wire:click="closeDetailModal" class="text-white hover:text-gray-300 font-bold text-xl">✕</button>
                     </div>
@@ -81,11 +81,11 @@
                         <div class="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border text-sm text-gray-700">
                             <div>
                                 <span class="text-xs text-gray-400 font-bold block uppercase">Cliente</span>
-                                <span class="font-bold text-gray-800">{{ $selected_sale->client_name }}</span>
+                                <span class="font-bold text-gray-800">{{ $this->selected_sale->client_name }}</span>
                             </div>
                             <div>
                                 <span class="text-xs text-gray-400 font-bold block uppercase">Cédula / RIF</span>
-                                <span class="font-bold text-gray-800">{{ $selected_sale->client_id_number ?? 'V-00000000' }}</span>
+                                <span class="font-bold text-gray-800">{{ $this->selected_sale->client_id_number ?? 'V-00000000' }}</span>
                             </div>
                         </div>
 
@@ -101,7 +101,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y text-gray-700">
-                                    @foreach($selected_sale->items as $item)
+                                    @foreach($this->selected_sale->items as $item)
                                         <tr>
                                             <td class="p-2 font-medium">{{ $item->product->name ?? 'Producto Eliminado' }}</td>
                                             <td class="p-2 text-center font-bold text-gray-900">
@@ -120,7 +120,7 @@
                             <div class="space-y-2">
                                 <span class="text-xs font-black text-gray-500 uppercase block">💳 Desglose de Pago</span>
                                 <div class="bg-gray-50 rounded border divide-y text-xs">
-                                    @foreach($selected_sale->payments as $payment)
+                                    @foreach($this->selected_sale->payments as $payment)
                                         <div class="p-2 flex justify-between">
                                             <span class="font-semibold text-gray-600">{{ $payment->payment_method }}</span>
                                             <span class="font-bold text-gray-800">Bs. {{ number_format($payment->amount, 2) }}</span>
@@ -131,14 +131,14 @@
 
                             <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 flex flex-col justify-center items-end">
                                 <span class="text-xs text-blue-700 font-bold uppercase">Monto Neto Facturado</span>
-                                <span class="text-2xl font-black text-blue-900">Bs. {{ number_format($selected_sale->total, 2) }}</span>
+                                <span class="text-2xl font-black text-blue-900">Bs. {{ number_format($this->selected_sale->total, 2) }}</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="p-4 bg-gray-50 border-t flex justify-between items-center">
                         <button type="button" 
-                                onclick="printTicket({{ $selected_sale->id }})"
+                                onclick="printTicket({{ $this->selected_sale->id }})"
                                 class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1">
                             🖨️ Imprimir Ticket Térmico
                         </button>

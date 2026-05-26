@@ -29,6 +29,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'branch_id',
+        'role', // <-- Añadido el rol
     ];
 
     /**
@@ -63,5 +65,39 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+        // --- HELPERS DE ROLES ---
+
+    /**
+     * Nivel 1: Súper Admin Global (Tú)
+     * Puede ver y auditar todas las compras y ventas de todas las sedes.
+     */
+    public function isGlobalAdmin()
+    {
+        return $this->role === 'admin_global';
+    }
+
+/**
+ * Nivel 2: Administrador de Sede
+ * Gestiona, ve historiales y hace cierres, pero ESTRICTAMENTE en su sucursal asignada.
+ */
+    public function isBranchAdmin()
+    {
+        return $this->role === 'admin_branch';
+    }
+
+    /**
+     * Nivel 3: Trabajador / Cajero por Sede
+     * Solo factura o registra, tiene acceso restringido a ver historiales generales.
+     */
+    public function isBranchWorker()
+    {
+        return $this->role === 'worker_branch';
     }
 }
