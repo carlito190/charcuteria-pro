@@ -12,9 +12,12 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <!--
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    -->
+                
 
                     <x-nav-link href="{{ route('providers') }}" :active="request()->routeIs('providers')">
                         {{ __('Proveedores') }}
@@ -30,6 +33,14 @@
 
                     <x-nav-link href="{{ route('purchases') }}" :active="request()->routeIs('purchases')">
                         {{ __('Compras') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('sales.create') }}" :active="request()->routeIs('sales.create')">
+                        {{ __('Ventas') }}
+                    </x-nav-link>
+
+                   <x-nav-link href="{{ route('sales.index') }}" :active="request()->routeIs('sales.index')">
+                        {{ __('Ver Historial') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('branches') }}" :active="request()->routeIs('branches')">

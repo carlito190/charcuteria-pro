@@ -8,7 +8,7 @@ use App\Models\ExchangeRate;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'category_id', 'cost_usd', 'profit_margin', 'barcode', 'is_active'];
+    protected $fillable = ['name','unit_type', 'category_id', 'cost_usd', 'profit_margin', 'barcode', 'is_active'];
 
     public function category()
     {

@@ -5,6 +5,8 @@ use App\Livewire\ProviderManager;
 use App\Livewire\ProductManager;
 use App\Livewire\PurchaseManager;
 use App\Livewire\TransferManager;
+use App\Livewire\Sales\CreateSale;
+use App\Livewire\Sales\IndexSales;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,4 +33,12 @@ Route::middleware([
     Route::get('/categorias', App\Livewire\CategoryManager::class)->name('categories');
     Route::get('/tasas', App\Livewire\ExchangeRateManager::class)->name('exchange-rates');
     Route::get('/transfers', TransferManager::class)->name('transfers.index');
+    Route::get('/ventas/crear', CreateSale::class)->name('sales.create');
+    Route::get('/ventas', IndexSales::class)->name('sales.index');
 });
+
+Route::get('/ventas/{sale}/ticket', function (\App\Models\Sale $sale) {
+    // Cargamos las relaciones necesarias
+    $sale->load(['items.product', 'payments']);
+    return view('sales.ticket', compact('sale'));
+})->name('sales.ticket');
