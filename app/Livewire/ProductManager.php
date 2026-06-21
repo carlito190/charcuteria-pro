@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
 use Livewire\WithFileUploads; // <-- Para la foto
 use App\Models\Product;
 use App\Models\Category;
@@ -11,6 +12,8 @@ use App\Models\ProductBranch;
 use App\Models\Branch;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductManager extends Component
 {
@@ -18,7 +21,7 @@ class ProductManager extends Component
     use WithFileUploads;
 
     public $search = '';
-    public $product_id, $name, $category_id, $barcode;
+    public $product_id, $name, $category_id, $barcode, $unit_type;
     public $cost_usd = 0;
     public $profit_margin = 30;
     public $is_open = false;
@@ -29,6 +32,17 @@ class ProductManager extends Component
     public $viewBranchId = 1; // Sede 1 por defecto para mostrar stock
     public $onlyLowStock = false; // Propiedad para el filtro
     public $brand_id, $image, $existing_image;
+    // Propiedades para almacenar lo que escribe el usuario en los buscadores
+    public $searchCategory = '';
+    public $searchBrand = '';
+
+    // Propiedades para los resultados filtrados en tiempo real
+    public $categoryResults = [];
+    public $brandResults = [];
+
+    // Variables auxiliares para mostrar el nombre seleccionado debajo del input (Opcional, muy útil)
+    public $selectedCategoryName = '';
+    public $selectedBrandName = '';
 
 
     public function render()
@@ -43,12 +57,13 @@ class ProductManager extends Component
         if ($this->onlyLowStock) {
             $productsQuery->whereHas('branches', function($query) {
                 $query->where('branch_id', $this->viewBranchId)
-                    ->where('stock', '<=', 5); 
+                    ->where('stock', '<=', 5);
             });
         }
 
+        // 👈 ¡Llamamos al scope directamente aquí también!
         $products = $productsQuery
-            ->where('name', 'like', '%' . $this->search . '%')
+            ->search($this->search)
             ->latest()
             ->paginate(10);
 
@@ -58,6 +73,50 @@ class ProductManager extends Component
             'categories' => \App\Models\Category::all(),
             'brands' => Brand::orderBy('name', 'asc')->get() // <-- 2. Enviamos el listado de marcas ordenadas
         ]);
+    }
+
+    // Escucha cuando cambia el input de categoría
+    public function updatedSearchCategory()
+    {
+        if (strlen($this->searchCategory) < 2) {
+            $this->categoryResults = [];
+            return;
+        }
+
+        $this->categoryResults = Category::where('name', 'like', '%' . $this->searchCategory . '%')
+            ->limit(5)
+            ->get();
+    }
+
+    // Asigna la categoría seleccionada
+    public function selectCategory($id, $name)
+    {
+        $this->category_id = $id;
+        $this->selectedCategoryName = $name;
+        $this->searchCategory = ''; // Limpia el buscador
+        $this->categoryResults = []; // Cierra la lista
+    }
+
+    // Escucha cuando cambia el input de marca
+    public function updatedSearchBrand()
+    {
+        if (strlen($this->searchBrand) < 2) {
+            $this->brandResults = [];
+            return;
+        }
+
+        $this->brandResults = Brand::where('name', 'like', '%' . $this->searchBrand . '%')
+            ->limit(5)
+            ->get();
+    }
+
+    // Asigna la marca seleccionada
+    public function selectBrand($id, $name)
+    {
+        $this->brand_id = $id;
+        $this->selectedBrandName = $name;
+        $this->searchBrand = ''; // Limpia el buscador
+        $this->brandResults = []; // Cierra la lista
     }
 
     public function openTransfer($productId)
@@ -124,7 +183,8 @@ class ProductManager extends Component
         $this->profit_margin = 30;
         $this->product_id = null;
         $this->image = null; // <-- Limpiamos el input file temporal
-        $this->existing_image = null; // <-- Limpiamos rastro de foto vieja 
+        $this->existing_image = null; // <-- Limpiamos rastro de foto vieja
+        $this->unit_type = null;
     }
 
     public function store()
@@ -140,7 +200,7 @@ class ProductManager extends Component
 
         // 2. PROCESAMIENTO FÍSICO DE LA IMAGEN
         $imagePath = $this->existing_image; // Mantiene la foto existente por defecto
-        
+
         if ($this->image) {
             // Si hay foto nueva y ya tenía una antes, la borramos del storage para no saturar el hosting
             if ($this->existing_image) {
@@ -153,6 +213,7 @@ class ProductManager extends Component
         // 3. Guardado final en BD
         Product::updateOrCreate(['id' => $this->product_id], [
             'name' => $this->name,
+            'unit_type' => $this->unit_type,
             'category_id' => $this->category_id,
             'brand_id' => $this->brand_id, // <-- Guardamos la Marca relacional
             'barcode' => $this->barcode,
@@ -169,16 +230,59 @@ class ProductManager extends Component
     public function edit($id)
     {
         $product = Product::findOrFail($id);
-        $this->product_id = $id;
-        $this->name = $product->name;
+
+        $product = Product::with(['category', 'brand'])->findOrFail($id);
+
+        $this->product_id = $product->id;
+
+
         $this->category_id = $product->category_id;
-        $this->brand_id = $product->brand_id; // <-- Cargamos la marca en el formulario
+        $this->brand_id = $product->brand_id;
+
+        $this->name = $product->name;
+        $this->unit_type = $product->unit_type;
+        $this->selectedCategoryName = $product->category->name ?? '';
+        $this->selectedBrandName = $product->brand->name ?? '';
         $this->barcode = $product->barcode;
         $this->cost_usd = $product->cost_usd;
         $this->profit_margin = $product->profit_margin;
         $this->existing_image = $product->image_path; // <-- Cargamos la foto actual si existe
         $this->image = null; // Reiniciamos el cargador por si acaso
-        
+
+        // Limpiamos los inputs de búsqueda para que no se queden con filtros viejos
+        $this->searchCategory = '';
+        $this->searchBrand = '';
+
         $this->openModal();
+    }
+
+    public function exportPdf()
+    {
+        // Traemos los mismos productos filtrados por tu buscador actual
+        $products = \App\Models\Product::with(['category', 'brand'])
+            ->where('name', 'like', '%' . $this->search . '%')
+            ->orWhere('barcode', 'like', '%' . $this->search . '%')
+            ->get();
+
+        // Cargamos una vista blade especial para el PDF y le pasamos los datos
+        $pdf = Pdf::loadView('exports.products-pdf', [
+            'products' => $products,
+            'date' => now()->format('d/m/Y h:i A')
+        ])->setPaper('letter', 'portrait'); // Tamaño Carta
+
+        // Retorna el archivo para descarga directa
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'Lista_Precios_Jireh_Market.pdf');
+    }
+
+    // 📊 EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        $products = \App\Models\Product::with(['category', 'brand'])
+            ->where('name', 'like', '%' . $this->search . '%')
+            ->get();
+
+        return Excel::download(new \App\Exports\ProductsExport($products), 'Inventario_Jireh_Market.xlsx');
     }
 }

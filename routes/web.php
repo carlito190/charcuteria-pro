@@ -10,6 +10,10 @@ use App\Livewire\Sales\IndexSales;
 use App\Livewire\Purchases\IndexPurchases;
 use App\Livewire\Users\UserManager;
 use App\Livewire\BrandManager;
+use App\Livewire\ClientIndex;
+use App\Livewire\AccountsReceivable;
+use App\Http\Controllers\ProductExportController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,6 +45,10 @@ Route::middleware([
     Route::get('/compras', IndexPurchases::class)->name('purchases.index');
     Route::get('/usuarios', UserManager::class)->name('users.index');
     Route::get('/marcas', BrandManager::class)->name('brands.index');
+    Route::get('/productos/exportar/pdf', [ProductExportController::class, 'pdf'])->name('products.export.pdf');
+    Route::get('/productos/exportar/excel', [ProductExportController::class, 'excel'])->name('products.export.excel');
+    Route::get('/clientes', ClientIndex::class)->name('clients.index');
+    Route::get('/cuentas-por-cobrar', AccountsReceivable::class)->name('cxc.index');
 });
 
 Route::get('/ventas/{sale}/ticket', function (\App\Models\Sale $sale) {

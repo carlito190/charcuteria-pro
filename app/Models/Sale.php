@@ -10,12 +10,19 @@ class Sale extends Model
     use HasFactory;
 
     protected $fillable = [
+        'date_sale',
+        'status',
         'invoice_number',
         'branch_id',
         'user_id',
+        'client_id',
         'client_name',
         'client_id_number',
         'total'
+    ];
+
+    protected $casts = [
+    'date_sale' => 'date', // Así Laravel lo trata automáticamente como una fecha limpia
     ];
 
     // Relación con los artículos del carrito

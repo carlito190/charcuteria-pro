@@ -8,14 +8,14 @@ use App\Models\ExchangeRate;
 
 class Product extends Model
 {
-    protected $fillable = 
+    protected $fillable =
     [
         'name',
-        'unit_type', 
-        'category_id', 
-        'cost_usd', 
-        'profit_margin', 
-        'barcode', 
+        'unit_type',
+        'category_id',
+        'cost_usd',
+        'profit_margin',
+        'barcode',
         'is_active',
         'brand_id',
         'image_path'
@@ -48,5 +48,28 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    /**
+     * Scope para buscar productos por nombre, código de barras o marca.
+     */
+    public function scopeSearch($query, $term)
+    {
+        // Si el término de búsqueda está vacío, retornamos el query sin modificarlo
+        if (empty($term)) {
+            return $query;
+        }
+
+        return $query->where(function($q) use ($term) {
+            $searchTerm = '%' . $term . '%';
+
+            $q->where('name', 'like', $searchTerm)
+            ->orWhere('barcode', 'like', $searchTerm)
+            ->orWhereHas('brand', function($brandQuery) use ($searchTerm) {
+                $brandQuery->where('name', 'like', $searchTerm);
+            })->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
+              $categoryQuery->where('name', 'like', $searchTerm);
+            });
+        });
     }
 }

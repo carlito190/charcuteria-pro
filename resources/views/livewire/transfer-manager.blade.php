@@ -59,6 +59,11 @@
                                                 wire:click="selectProduct({{ $product->id }}, '{{ $product->name }}')"
                                                 class="w-full text-left p-3 hover:bg-indigo-50 border-b text-sm transition">
                                             {{ $product->name }}
+                                            @if($product->brand)
+                                                <span class="bg-gray-100 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-gray-200 uppercase">
+                                                    {{ $product->brand->name }}
+                                                </span>
+                                            @endif
                                         </button>
                                     @endforeach
                                 </div>

@@ -18,6 +18,10 @@ class Purchase extends Model
         'invoice_number',
         'purchase_date',
         'total_usd',
+        'status',
+        'due_date',
+        'amount_paid',
+        'balance_due',
 
     ];
 

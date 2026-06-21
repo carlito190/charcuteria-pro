@@ -130,15 +130,18 @@ class TransferManager extends Component
     {
         $search_results = [];
         if (strlen($this->search_product) > 1) {
-            $search_results = Product::where('name', 'like', '%' . $this->search_product . '%')
-                ->limit(5)->get();
+            $search_results = Product::with(['brand', 'category'])
+            ->search($this->search_product)
+            ->limit(5)
+            ->get();
         }
 
         return view('livewire.transfer-manager', [
             'branches' => Branch::all(),
             'search_results' => $search_results,
             'history' => Transfer::with(['fromBranch', 'toBranch', 'items.product'])
-                ->latest()->paginate(5)
+                ->latest()
+                ->paginate(5)
         ]);
     }
 }
